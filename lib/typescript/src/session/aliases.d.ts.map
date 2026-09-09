@@ -1,0 +1,1 @@
+{"version":3,"file":"aliases.d.ts","sourceRoot":"","sources":["../../../../src/session/aliases.tsx"],"names":[],"mappings":"AAAA,OAAO,KAAK,KAAK,MAAM,OAAO,CAAC;AAC/B,OAAO,EAAE,iBAAiB,EAAE,KAAK,sBAAsB,EAAE,MAAM,qBAAqB,CAAC;AAErF,kEAAkE;AAClE,eAAO,MAAM,wBAAwB,0BAAoB,CAAC;AAE1D,4FAA4F;AAC5F,eAAO,MAAM,sBAAsB,0BAAoB,CAAC;AAExD,qEAAqE;AACrE,wBAAgB,WAAW,CAAC,KAAK,EAAE,sBAAsB,qBAExD"}

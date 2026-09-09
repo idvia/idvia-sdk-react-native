@@ -1,0 +1,28 @@
+{
+  "name": "@trustcloud/react-native-sdk",
+  "version": "0.1.0",
+  "description": "React Native SDK for TrustCloud / Idvia VideoID and Sign flows (API client + WebView rendering)",
+  "main": "./lib/commonjs/index.js",
+  "module": "./lib/module/index.js",
+  "types": "./lib/typescript/src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib/typescript/src/index.d.ts",
+      "import": "./lib/module/index.js",
+      "require": "./lib/commonjs/index.js"
+    }
+  },
+  "files": ["lib"],
+  "license": "UNLICENSED",
+  "peerDependencies": {
+    "react": "*",
+    "react-native": "*",
+    "react-native-webview": ">=11.0.0",
+    "expo-web-browser": "*",
+    "react-native-inappbrowser-reborn": "*"
+  },
+  "peerDependenciesMeta": {
+    "expo-web-browser": { "optional": true },
+    "react-native-inappbrowser-reborn": { "optional": true }
+  }
+}

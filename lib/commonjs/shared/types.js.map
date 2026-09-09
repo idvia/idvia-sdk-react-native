@@ -1,0 +1,1 @@
+{"version":3,"names":["makeError","code","message","nativeError"],"sourceRoot":"../../../src","sources":["shared/types.ts"],"mappings":";;;;;;AAyBO,SAASA,SAASA,CACvBC,IAAyB,EACzBC,OAAe,EACfC,WAAqB,EACJ;EACjB,OAAO;IAAEF,IAAI;IAAEC,OAAO;IAAEC;EAAY,CAAC;AACvC","ignoreList":[]}
