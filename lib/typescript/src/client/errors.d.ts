@@ -1,4 +1,4 @@
-export declare class TrustCloudApiError extends Error {
+export declare class IdviaApiError extends Error {
     readonly status: number;
     readonly endpoint: string;
     readonly body?: unknown;

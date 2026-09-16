@@ -1,18 +1,18 @@
 import * as React from 'react';
 import { type StyleProp, type ViewStyle } from 'react-native';
-import { type TrustCloudError, type TrustCloudNavigationEvent, type TrustCloudResult } from '../shared/types';
-export interface TrustCloudSessionProps {
-    /** Session URL created via TrustCloudClient or your backend. */
+import { type IdviaError, type IdviaNavigationEvent, type IdviaResult } from '../shared/types';
+export interface IdviaSessionProps {
+    /** Session URL created via IdviaClient or your backend. */
     url: string;
     /** Navigation to this URL fires onSuccess. */
     landingUrl: string;
     /** Navigation to this URL fires onFailure. Checked before landingUrl. */
     landingKoUrl?: string;
-    onSuccess?: (result: TrustCloudResult) => void;
-    onFailure?: (result: TrustCloudResult) => void;
+    onSuccess?: (result: IdviaResult) => void;
+    onFailure?: (result: IdviaResult) => void;
     onCancel?: () => void;
-    onError?: (error: TrustCloudError) => void;
-    onNavigationEvent?: (event: TrustCloudNavigationEvent) => void;
+    onError?: (error: IdviaError) => void;
+    onNavigationEvent?: (event: IdviaNavigationEvent) => void;
     renderLoading?: () => React.ReactElement;
     /** Default true. Auto-grant camera/mic to the page. Set false for Sign-only screens. */
     mediaPermissions?: boolean;
@@ -22,5 +22,5 @@ export interface TrustCloudSessionProps {
     /** Escape hatch: spread last onto the underlying WebView. */
     webViewProps?: Record<string, unknown>;
 }
-export declare function TrustCloudSession(props: TrustCloudSessionProps): React.JSX.Element;
-//# sourceMappingURL=TrustCloudSession.d.ts.map
+export declare function IdviaSession(props: IdviaSessionProps): React.JSX.Element;
+//# sourceMappingURL=IdviaSession.d.ts.map

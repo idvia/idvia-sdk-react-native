@@ -1,12 +1,12 @@
 # Backend: creating a session
 
 The SDK renders a **session URL**. That URL must be created on **your backend**,
-because creating it requires your TrustCloud `client_secret`, which must never
+because creating it requires your Idvia `client_secret`, which must never
 ship in a production mobile app. (For development and pilot integrations the
-SDK offers an in-app alternative — see [TrustCloudClient](client.md) and its
+SDK offers an in-app alternative — see [IdviaClient](client.md) and its
 security warning.)
 
-This page shows the exact TrustCloud calls your backend makes for each flow. Endpoints
+This page shows the exact Idvia calls your backend makes for each flow. Endpoints
 below use the **preproduction** host; swap the host for production.
 
 | Environment | Orchestrator base URL | Token endpoint |
@@ -179,9 +179,9 @@ to the app.
 Wrap the above behind one endpoint your app can call safely:
 
 ```
-POST /trustcloud/sessions   →  { url, landingUrl, landingKoUrl, reference }
-GET  /trustcloud/results/:reference  →  { status }   // reads webhook/status state
+POST /idvia/sessions   →  { url, landingUrl, landingKoUrl, reference }
+GET  /idvia/results/:reference  →  { status }   // reads webhook/status state
 ```
 
-Your app authenticates to **your** backend (its own auth), never to TrustCloud
+Your app authenticates to **your** backend (its own auth), never to Idvia
 directly. See [Handling results](handling-results.md) for the result side.

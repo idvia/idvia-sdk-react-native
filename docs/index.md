@@ -1,8 +1,8 @@
-# TrustCloud React Native SDK — Overview
+# Idvia React Native SDK — Overview
 
-The `@trustcloud/react-native-sdk` package lets you embed TrustCloud / Idvia
+The `@idvia/react-native-sdk` package lets you embed Idvia
 identity and signature flows into a React Native app with minimal integration
-effort. It wraps the **hosted web flows** that TrustCloud already serves, so you
+effort. It wraps the **hosted web flows** that Idvia already serves, so you
 get the full, always-current experience without writing native camera, liveness,
 video-call, or e-signature code.
 
@@ -11,15 +11,15 @@ video-call, or e-signature code.
 | Flow | Component alias | What the user does |
 |------|-----------------|--------------------|
 | **VideoID Unassisted** | `<VideoIdUnassistedSession>` | Scans their ID document and does a selfie/liveness check, fully self-service. |
-| **VideoID Assisted** | `<VideoIdAssistedSession>` | Joins a live video call with a TrustCloud agent who verifies them. |
+| **VideoID Assisted** | `<VideoIdAssistedSession>` | Joins a live video call with a Idvia agent who verifies them. |
 | **Sign** | `<SignSession>` | Reviews and signs one or more documents (standard or qualified e-signature). |
 
-All three are the **same core component** (`<TrustCloudSession>`) under the hood —
+All three are the **same core component** (`<IdviaSession>`) under the hood —
 the aliases just carry sensible defaults and flow-specific TypeScript types.
 
 ## How the wrapper works
 
-Every TrustCloud flow follows the same server pattern: your backend creates a
+Every Idvia flow follows the same server pattern: your backend creates a
 process and receives a **one-time URL**; the user opens that URL to complete the
 flow; the authoritative result is retrieved server-side.
 
@@ -27,14 +27,14 @@ flow; the authoritative result is retrieved server-side.
 sequenceDiagram
     participant App as RN App
     participant BE as Your Backend
-    participant TC as TrustCloud API
+    participant TC as Idvia API
     participant WV as SDK WebView
 
     App->>BE: Request a new session
     BE->>TC: Create process (with client_secret)
     TC-->>BE: { url, ids }
     BE-->>App: { url, landingUrl, landingKoUrl, reference }
-    App->>WV: <TrustCloudSession url=... />
+    App->>WV: <IdviaSession url=... />
     WV->>TC: Loads hosted flow (camera / video / signing)
     Note over WV: User completes the flow in the WebView
     TC-->>WV: Redirects to landingUrl (OK) or landingKoUrl (KO)
@@ -53,12 +53,12 @@ The SDK's only jobs are:
 
 ## Security model (read this)
 
-- **Your TrustCloud `client_secret` never lives in the app.** The token request
+- **Your Idvia `client_secret` never lives in the app.** The token request
   and the process-creation call happen on **your backend**. The app only ever
   receives a short-lived session URL. See
   [Backend: creating a session](backend-session-creation.md). For
   development/pilot integrations the SDK also offers an in-app client that
-  embeds the credentials — see [TrustCloudClient](client.md) and its security
+  embeds the credentials — see [IdviaClient](client.md) and its security
   warning.
 - **The client-side outcome is a UX signal, not a verdict.** `onSuccess` means
   "the user reached your success landing page" — it does **not** prove the
@@ -72,7 +72,7 @@ The SDK's only jobs are:
 ✅ **Great fit for:**
 - Getting to market fast (days, not weeks).
 - One integration that behaves identically on iOS and Android.
-- Always running the latest TrustCloud flow with no app release.
+- Always running the latest Idvia flow with no app release.
 - **Unassisted** and **Sign** — these run flawlessly in an embedded WebView.
 
 ⚠️ **Consider carefully for:**
@@ -85,7 +85,7 @@ The SDK's only jobs are:
 ## Alternatives
 
 If you need a **fully native, embedded** experience (native camera UI, offline
-document capture, NFC chip reading), TrustCloud ships native Android (`.aar`) and
+document capture, NFC chip reading), Idvia ships native Android (`.aar`) and
 iOS (framework) SDKs for the two video flows. Those give a richer UX at the cost
 of a larger native integration (binary distribution, license files, OpenTok
 wiring, per-platform permission handling). **Sign has no native SDK** — it is
@@ -101,7 +101,7 @@ a flow demands it.
 2. [Platform setup](platform-setup.md) — camera/mic permissions (required for the
    video flows).
 3. [Backend: creating a session](backend-session-creation.md) — the server side.
-4. [TrustCloudClient](client.md) — create sessions directly from the app for
+4. [IdviaClient](client.md) — create sessions directly from the app for
    development/pilot.
 
 ## All documentation
@@ -116,6 +116,6 @@ a flow demands it.
 | [Guide: VideoID Assisted](guides/video-assisted.md) | End-to-end assisted (agent) flow |
 | [Guide: Sign](guides/sign.md) | End-to-end signature flow |
 | [API reference](api-reference.md) | Components, props, hooks, types, errors |
-| [TrustCloudClient](client.md) | In-app session creation for development/pilot |
+| [IdviaClient](client.md) | In-app session creation for development/pilot |
 | [Handling results](handling-results.md) | Webhooks vs polling; why the client outcome is not authoritative |
 | [Troubleshooting](troubleshooting.md) | Camera/WebRTC/cookie gotchas |

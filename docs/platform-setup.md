@@ -39,7 +39,7 @@ Expo — add to `app.json`:
 
 ### 2. WebView media flags
 
-The SDK sets these automatically when you use `<TrustCloudSession>`, but if you
+The SDK sets these automatically when you use `<IdviaSession>`, but if you
 build your own WebView, you need:
 
 - `allowsInlineMediaPlayback={true}` — otherwise the camera opens full-screen and breaks the flow.
@@ -96,7 +96,7 @@ export async function ensureMediaPermissions() {
 
 ### 3. WebView `onPermissionRequest`
 
-The WebView must grant the web page's camera/mic request. `<TrustCloudSession>`
+The WebView must grant the web page's camera/mic request. `<IdviaSession>`
 handles this internally. If you build your own WebView, grant the request in
 `onPermissionRequest` and enable `domStorageEnabled`, `javaScriptEnabled`, and
 `thirdPartyCookiesEnabled`.
@@ -105,7 +105,7 @@ handles this internally. If you build your own WebView, grant the request in
 
 ## Cookies & sessions
 
-TrustCloud flows keep server state in cookies across redirects. The SDK enables:
+Idvia flows keep server state in cookies across redirects. The SDK enables:
 
 - iOS: `sharedCookiesEnabled={true}`
 - Android: `thirdPartyCookiesEnabled={true}` + DOM storage

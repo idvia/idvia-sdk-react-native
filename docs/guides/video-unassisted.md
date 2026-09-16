@@ -15,7 +15,7 @@ This flow runs **excellently in an embedded WebView**.
 ```tsx
 import { useEffect, useState } from 'react';
 import { ActivityIndicator } from 'react-native';
-import { VideoIdUnassistedSession } from '@trustcloud/react-native-sdk';
+import { VideoIdUnassistedSession } from '@idvia/react-native-sdk';
 import { ensureMediaPermissions } from '../permissions';
 
 export function UnassistedScreen({ onDone }) {
@@ -25,7 +25,7 @@ export function UnassistedScreen({ onDone }) {
     (async () => {
       const ok = await ensureMediaPermissions();
       if (!ok) return onDone({ status: 'permission_denied' });
-      const res = await fetch('https://your-backend.example.com/trustcloud/sessions', {
+      const res = await fetch('https://your-backend.example.com/idvia/sessions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ flow: 'unassisted' }),
@@ -56,10 +56,10 @@ export function UnassistedScreen({ onDone }) {
 The unassisted flow redirects to your `landingURL` when the **user finishes** and
 to `landingKoUrl` on abandonment/expiry. That tells you the *session ended* — it
 does **not** tell you whether the identity check passed. The verdict is produced
-by TrustCloud's engine afterwards.
+by Idvia's engine afterwards.
 
 Confirm the real outcome server-side. The relevant webhook is
-`TrustCloudVideoIDUnassisted`, whose `Message` is `OK`, `KO: USER ABANDONED`,
+`IdviaVideoIDUnassisted`, whose `Message` is `OK`, `KO: USER ABANDONED`,
 `KO: VIDEOIDENTIFICATION DATE EXPIRED`, etc. Evidence and the final engine
 verdict arrive via the `EvidenceVaulted` and `EngineVerificationCompleted`
 events. See [Handling results](../handling-results.md).
@@ -72,7 +72,7 @@ not in the app. That keeps the mobile integration stable — you can change the
 verification policy without an app release. Relevant create-time fields include
 `useActiveLifeLivenessEngine`, `checkForFaceMatching`,
 `faceMatchSimilarityThreshold`, `slaExpirationSeconds`, and `workflow`. See the
-TrustCloud VideoID Unassisted API reference for the full list.
+Idvia VideoID Unassisted API reference for the full list.
 
 ## Tips
 

@@ -1,9 +1,9 @@
 import * as React from 'react';
-import { TrustCloudSession, type TrustCloudSessionProps } from './TrustCloudSession';
+import { IdviaSession, type IdviaSessionProps } from './IdviaSession';
 /** VideoID Unassisted — self-service document scan + liveness. */
-export declare const VideoIdUnassistedSession: typeof TrustCloudSession;
-/** VideoID Assisted — live agent call. Prefer openTrustCloudSession in-app-browser mode. */
-export declare const VideoIdAssistedSession: typeof TrustCloudSession;
+export declare const VideoIdUnassistedSession: typeof IdviaSession;
+/** VideoID Assisted — live agent call. Prefer openIdviaSession in-app-browser mode. */
+export declare const VideoIdAssistedSession: typeof IdviaSession;
 /** Sign — no camera/mic needed, so media permissions default off. */
-export declare function SignSession(props: TrustCloudSessionProps): React.JSX.Element;
+export declare function SignSession(props: IdviaSessionProps): React.JSX.Element;
 //# sourceMappingURL=aliases.d.ts.map

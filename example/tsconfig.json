@@ -4,6 +4,6 @@
     "strict": true,
     "ignoreDeprecations": "6.0",
     "baseUrl": ".",
-    "paths": { "@trustcloud/react-native-sdk": ["../lib/typescript/src/index.d.ts"] }
+    "paths": { "@idvia/react-native-sdk": ["../lib/typescript/src/index.d.ts"] }
   }
 }

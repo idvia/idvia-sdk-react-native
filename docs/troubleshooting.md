@@ -21,7 +21,7 @@ See [Platform setup](platform-setup.md) for the exact config.
 
 Assisted uses WebRTC (OpenTok/Vonage), which is the most WebView-sensitive path.
 
-- Switch to **in-app browser mode** (`openTrustCloudSession({ mode: 'in-app-browser' })`)
+- Switch to **in-app browser mode** (`openIdviaSession({ mode: 'in-app-browser' })`)
   — it uses the system browser engine and is the most compatible.
 - Confirm the device is on a stable network; WebRTC needs decent bandwidth and
   may be blocked by restrictive corporate/VPN networks.
@@ -66,7 +66,7 @@ Rebuild the app (a JS reload isn't enough after adding a native module).
 
 - The session URL may have **expired** (`slaExpirationSeconds`) or already been
   used. Session URLs are one-time — create a fresh one per attempt.
-- Check the device can reach the TrustCloud host (corporate proxies, ad
+- Check the device can reach the Idvia host (corporate proxies, ad
   blockers, VPNs can interfere).
 
 ## Result is `PENDING` right after the user finishes

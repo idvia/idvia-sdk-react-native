@@ -5,7 +5,7 @@
 - React Native `0.71+` (bare) or Expo SDK `49+` with a **custom dev client**
   (the SDK needs native camera/microphone permissions, which Expo Go cannot
   grant).
-- A TrustCloud / Idvia **use case** provisioned for the flow(s) you want, with
+- A Idvia **use case** provisioned for the flow(s) you want, with
   `client_id`, `client_secret`, and an API key.
 - A **backend endpoint you control** that creates sessions (see
   [Backend: creating a session](backend-session-creation.md)). The app must
@@ -14,9 +14,9 @@
 ## Install
 
 ```bash
-npm install @trustcloud/react-native-sdk react-native-webview
+npm install @idvia/react-native-sdk react-native-webview
 # or
-yarn add @trustcloud/react-native-sdk react-native-webview
+yarn add @idvia/react-native-sdk react-native-webview
 ```
 
 `react-native-webview` is a **peer dependency** — you install it in your app so
@@ -51,12 +51,12 @@ The pattern is always the same three steps.
 
 ### 1. Ask your backend for a session
 
-Your backend calls TrustCloud, creates the process, and returns the URL plus the
+Your backend calls Idvia, creates the process, and returns the URL plus the
 landing URLs it registered.
 
 ```ts
 async function createSession(flow: 'unassisted' | 'assisted' | 'sign') {
-  const res = await fetch('https://your-backend.example.com/trustcloud/sessions', {
+  const res = await fetch('https://your-backend.example.com/idvia/sessions', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${appToken}` },
     body: JSON.stringify({ flow, user: { name: 'Ada Lovelace' } }),
@@ -72,7 +72,7 @@ async function createSession(flow: 'unassisted' | 'assisted' | 'sign') {
 ```
 
 > **No backend yet?** For development/pilot you can create the session
-> directly in the app with [`TrustCloudClient`](client.md) — it holds your
+> directly in the app with [`IdviaClient`](client.md) — it holds your
 > credentials in the app binary, so read the security warning there before
 > shipping.
 
@@ -81,7 +81,7 @@ async function createSession(flow: 'unassisted' | 'assisted' | 'sign') {
 ```tsx
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
-import { TrustCloudSession } from '@trustcloud/react-native-sdk';
+import { IdviaSession } from '@idvia/react-native-sdk';
 
 export function VerifyScreen() {
   const [session, setSession] = useState(null);
@@ -93,7 +93,7 @@ export function VerifyScreen() {
   if (!session) return <ActivityIndicator style={{ flex: 1 }} />;
 
   return (
-    <TrustCloudSession
+    <IdviaSession
       url={session.url}
       landingUrl={session.landingUrl}
       landingKoUrl={session.landingKoUrl}
@@ -110,11 +110,11 @@ export function VerifyScreen() {
 ### 3. Confirm the result server-side
 
 `onSuccess` only means the user reached your success page. Ask your backend for
-the **authoritative** result (it knows from TrustCloud webhooks / status calls):
+the **authoritative** result (it knows from Idvia webhooks / status calls):
 
 ```ts
 async function confirmResult(reference: string) {
-  const res = await fetch(`https://your-backend.example.com/trustcloud/results/${reference}`);
+  const res = await fetch(`https://your-backend.example.com/idvia/results/${reference}`);
   const { status } = await res.json(); // e.g. 'VERIFIED' | 'REJECTED' | 'PENDING'
   // update your UI based on the real status
 }

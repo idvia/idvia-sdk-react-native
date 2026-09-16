@@ -9,7 +9,7 @@ const config = getDefaultConfig(projectRoot);
 // Let Metro see the SDK package (compiled lib/) one level up.
 config.watchFolders = [workspaceRoot];
 config.resolver.extraNodeModules = {
-  '@trustcloud/react-native-sdk': workspaceRoot,
+  '@idvia/react-native-sdk': workspaceRoot,
   // Force single copies of the peer deps from the example's own node_modules.
   react: path.resolve(projectRoot, 'node_modules/react'),
   'react-native': path.resolve(projectRoot, 'node_modules/react-native'),

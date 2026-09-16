@@ -1,6 +1,6 @@
-# @trustcloud/react-native-sdk
+# @idvia/react-native-sdk
 
-React Native SDK for TrustCloud / Idvia **VideoID Unassisted**, **VideoID
+React Native SDK for Idvia **VideoID Unassisted**, **VideoID
 Assisted**, and **Sign** flows: an API client plus a managed-WebView rendering
 layer.
 

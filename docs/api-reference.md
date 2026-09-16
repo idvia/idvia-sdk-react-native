@@ -2,7 +2,7 @@
 
 ## Components
 
-### `<TrustCloudSession>`
+### `<IdviaSession>`
 
 The core component. Renders a session URL in a hardened WebView and reports the
 outcome. The flow-specific aliases below are identical except for defaults and
@@ -13,7 +13,7 @@ result typing.
 - `<SignSession>`
 
 The API client used to create sessions in-app is documented in
-[TrustCloudClient](client.md).
+[IdviaClient](client.md).
 
 #### Props
 
@@ -22,11 +22,11 @@ The API client used to create sessions in-app is documented in
 | `url` | `string` | ✅ | The session URL created by your backend. |
 | `landingUrl` | `string` | ✅ | The URL the flow redirects to on completion. Navigation to it triggers `onSuccess`. |
 | `landingKoUrl` | `string` | — | The URL for the KO/failure path. Navigation to it triggers `onFailure`. Omit if the flow uses a single landing URL. |
-| `onSuccess` | `(result: TrustCloudResult) => void` | — | Fired when navigation reaches `landingUrl`. |
-| `onFailure` | `(result: TrustCloudResult) => void` | — | Fired when navigation reaches `landingKoUrl`. |
+| `onSuccess` | `(result: IdviaResult) => void` | — | Fired when navigation reaches `landingUrl`. |
+| `onFailure` | `(result: IdviaResult) => void` | — | Fired when navigation reaches `landingKoUrl`. |
 | `onCancel` | `() => void` | — | Fired when the user dismisses the flow (e.g. hardware back, close button). |
-| `onError` | `(error: TrustCloudError) => void` | — | Fired on load failure, permission denial, or invalid URL. |
-| `onNavigationEvent` | `(event: TrustCloudNavigationEvent) => void` | — | Low-level: every navigation the WebView attempts. For diagnostics. |
+| `onError` | `(error: IdviaError) => void` | — | Fired on load failure, permission denial, or invalid URL. |
+| `onNavigationEvent` | `(event: IdviaNavigationEvent) => void` | — | Low-level: every navigation the WebView attempts. For diagnostics. |
 | `renderLoading` | `() => React.ReactElement` | — | Custom loading UI shown while the flow loads. |
 | `mediaPermissions` | `boolean` | — | Default `true`. Auto-grant camera/mic to the WebView. Set `false` for Sign-only screens. |
 | `loadTimeoutMs` | `number` | — | Default `30000`. If the first load hasn't completed in time, `onError` fires with `TIMEOUT`. |
@@ -44,7 +44,7 @@ The API client used to create sessions in-app is documented in
 
 ## Imperative API
 
-### `openTrustCloudSession(options): Promise<TrustCloudResult>`
+### `openIdviaSession(options): Promise<IdviaResult>`
 
 Opens a session in an **in-app browser** (SFSafariViewController / Chrome Custom
 Tabs) or a modal WebView, and resolves with the outcome. Recommended for the
@@ -58,28 +58,28 @@ type OpenOptions = {
   mode?: 'in-app-browser' | 'webview'; // default 'webview'
 };
 
-const result = await openTrustCloudSession(options);
+const result = await openIdviaSession(options);
 ```
 
-Calling `openTrustCloudSession` in `'webview'` mode while another
+Calling `openIdviaSession` in `'webview'` mode while another
 `'webview'`-mode session is already presenting **supersedes** it: the
 superseded call's promise resolves `{ outcome: 'cancel' }`.
 
-### `<TrustCloudPortal>`
+### `<IdviaPortal>`
 
-Required for `openTrustCloudSession`'s default `'webview'` mode: render it
+Required for `openIdviaSession`'s default `'webview'` mode: render it
 **once at your app root** (e.g. the bottom of `App.tsx`). It hosts the modal
-WebView the imperative call presents. Calling `openTrustCloudSession` with
+WebView the imperative call presents. Calling `openIdviaSession` with
 mode `'webview'` and no portal mounted rejects with `PORTAL_NOT_MOUNTED`.
 
 ## Hook
 
-### `useTrustCloudSession()`
+### `useIdviaSession()`
 
 Convenience state machine for the imperative flow.
 
 ```ts
-const { status, result, error, present } = useTrustCloudSession();
+const { status, result, error, present } = useIdviaSession();
 // status: 'idle' | 'presenting' | 'success' | 'failure' | 'cancel' | 'error'
 await present({ url, landingUrl, landingKoUrl, mode: 'in-app-browser' });
 ```
@@ -91,13 +91,13 @@ discarded.
 
 ## Types
 
-### `TrustCloudResult`
+### `IdviaResult`
 
 ```ts
-type TrustCloudOutcome = 'success' | 'failure' | 'cancel';
+type IdviaOutcome = 'success' | 'failure' | 'cancel';
 
-interface TrustCloudResult {
-  outcome: TrustCloudOutcome;
+interface IdviaResult {
+  outcome: IdviaOutcome;
   /** The full URL that was intercepted, including query string. */
   landingUrl?: string;
   /** Parsed query params from the landing URL (provider-dependent). */
@@ -108,20 +108,20 @@ interface TrustCloudResult {
 > **`params` are advisory.** Providers may append query parameters to the landing
 > URL, but you must not rely on them as proof of outcome — confirm server-side.
 
-### `TrustCloudError`
+### `IdviaError`
 
 ```ts
-type TrustCloudErrorCode =
+type IdviaErrorCode =
   | 'LOAD_FAILED'          // the URL failed to load (network, 4xx/5xx)
   | 'PERMISSION_DENIED'    // camera/mic permission was refused
   | 'INVALID_URL'          // url/landingUrl missing or malformed
   | 'TIMEOUT'              // the flow did not load within the timeout
   | 'WEBVIEW_UNSUPPORTED'  // react-native-webview not installed/linked
   | 'BROWSER_UNSUPPORTED'  // in-app-browser mode: no browser module installed
-  | 'PORTAL_NOT_MOUNTED';  // webview mode: <TrustCloudPortal /> is not rendered
+  | 'PORTAL_NOT_MOUNTED';  // webview mode: <IdviaPortal /> is not rendered
 
-interface TrustCloudError {
-  code: TrustCloudErrorCode;
+interface IdviaError {
+  code: IdviaErrorCode;
   message: string;
   nativeError?: unknown;
 }
@@ -134,10 +134,10 @@ interface TrustCloudError {
 > app's OS-level permissions, so this code is not a substitute for handling
 > runtime permissions per [Platform setup](platform-setup.md).
 
-### `TrustCloudNavigationEvent`
+### `IdviaNavigationEvent`
 
 ```ts
-interface TrustCloudNavigationEvent {
+interface IdviaNavigationEvent {
   url: string;
   loading: boolean;
   canGoBack: boolean;
@@ -151,7 +151,7 @@ interface TrustCloudNavigationEvent {
 | Navigation reached `landingUrl` | `onSuccess` | `success` |
 | Navigation reached `landingKoUrl` | `onFailure` | `failure` |
 | User dismissed the flow | `onCancel` | `cancel` |
-| Load / permission / config failure | `onError` | — (`TrustCloudError`) |
+| Load / permission / config failure | `onError` | — (`IdviaError`) |
 
 All outcomes are **UX signals**. The authoritative verification/signature result
 is always confirmed server-side — see [Handling results](handling-results.md).

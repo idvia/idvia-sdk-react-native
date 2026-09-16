@@ -11,16 +11,16 @@ import {
 } from 'react-native';
 import {
   SignSession,
-  TrustCloudClient,
-  TrustCloudPortal,
-  TrustCloudSession,
-  openTrustCloudSession,
-  type TrustCloudResult,
-} from '@trustcloud/react-native-sdk';
+  IdviaClient,
+  IdviaPortal,
+  IdviaSession,
+  openIdviaSession,
+  type IdviaResult,
+} from '@idvia/react-native-sdk';
 import { CONFIG } from './config';
 import { ensureMediaPermissions } from './permissions';
 
-const client = new TrustCloudClient(CONFIG);
+const client = new IdviaClient(CONFIG);
 
 // Set EXPO_PUBLIC_WEBVIEW_DEBUG=1 (e.g. `EXPO_PUBLIC_WEBVIEW_DEBUG=1 npx expo start`)
 // to forward the webview page's console, errors, network and media activity to
@@ -94,7 +94,7 @@ export default function App() {
       // plain-text assisted responses carry no ids — status polling is unavailable then
       const ids = s.trustCloudFileId ? { trustCloudFileId: s.trustCloudFileId } : undefined;
       if (assistedInBrowser) {
-        const result = await openTrustCloudSession({
+        const result = await openIdviaSession({
           url: s.url,
           landingUrl: CONFIG.landingUrl,
           mode: 'in-app-browser',
@@ -125,7 +125,7 @@ export default function App() {
     }
   }
 
-  function onSessionDone(flow: Flow, result: TrustCloudResult, ids?: Record<string, string>) {
+  function onSessionDone(flow: Flow, result: IdviaResult, ids?: Record<string, string>) {
     setScreen({
       name: 'result',
       flow,
@@ -157,7 +157,7 @@ export default function App() {
   }
 
   if (screen.name === 'session') {
-    const Session = screen.flow === 'sign' ? SignSession : TrustCloudSession;
+    const Session = screen.flow === 'sign' ? SignSession : IdviaSession;
     // The Android System WebView UA carries a "; wv)" token that WebRTC
     // providers (OpenTok/Vonage) sniff as an unsupported browser, breaking
     // the assisted flow's mic detection. Present a Chrome-like UA instead.
@@ -398,7 +398,7 @@ true;
   return (
     <SafeAreaView style={styles.flex}>
       <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.title}>TrustCloud SDK example</Text>
+        <Text style={styles.title}>Idvia SDK example</Text>
         {screen.name === 'result' ? (
           <>
             <Text style={styles.mono}>{screen.text}</Text>
@@ -421,7 +421,7 @@ true;
           </>
         )}
       </ScrollView>
-      <TrustCloudPortal />
+      <IdviaPortal />
     </SafeAreaView>
   );
 }

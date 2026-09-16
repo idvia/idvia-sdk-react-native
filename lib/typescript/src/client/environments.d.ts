@@ -1,8 +1,8 @@
-export type TrustCloudEnvironment = 'pre' | 'pro';
-export interface TrustCloudUrls {
+export type IdviaEnvironment = 'pre' | 'pro';
+export interface IdviaUrls {
     orchestrator: string;
     identityServer: string;
 }
-export declare const ENVIRONMENT_URLS: Record<TrustCloudEnvironment, TrustCloudUrls>;
-export declare const TOKEN_PATHS: Record<TrustCloudEnvironment, string>;
+export declare const ENVIRONMENT_URLS: Record<IdviaEnvironment, IdviaUrls>;
+export declare const TOKEN_PATHS: Record<IdviaEnvironment, string>;
 //# sourceMappingURL=environments.d.ts.map

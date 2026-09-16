@@ -1,7 +1,7 @@
 {
-  "name": "@trustcloud/react-native-sdk",
+  "name": "@idvia/react-native-sdk",
   "version": "0.1.0",
-  "description": "React Native SDK for TrustCloud / Idvia VideoID and Sign flows (API client + WebView rendering)",
+  "description": "React Native SDK for Idvia VideoID and Sign flows (API client + WebView rendering)",
   "main": "./lib/commonjs/index.js",
   "module": "./lib/module/index.js",
   "types": "./lib/typescript/src/index.d.ts",

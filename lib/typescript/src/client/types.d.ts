@@ -1,16 +1,16 @@
-import type { TrustCloudEnvironment, TrustCloudUrls } from './environments';
-export interface TrustCloudUseCaseIds {
+import type { IdviaEnvironment, IdviaUrls } from './environments';
+export interface IdviaUseCaseIds {
     videoIdUnassisted?: string;
     videoIdAssisted?: string;
     sign?: string;
 }
-export interface TrustCloudClientConfig {
-    environment: TrustCloudEnvironment;
+export interface IdviaClientConfig {
+    environment: IdviaEnvironment;
     clientId: string;
     clientSecret: string;
-    useCaseIds?: TrustCloudUseCaseIds;
+    useCaseIds?: IdviaUseCaseIds;
     /** Escape hatch overriding the environment presets. */
-    urls?: Partial<TrustCloudUrls>;
+    urls?: Partial<IdviaUrls>;
 }
 /**
  * The API's nested `configuration` object — mandatory on the create call.

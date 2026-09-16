@@ -1,7 +1,7 @@
 # Guide: VideoID Assisted
 
 Live identity verification: the user joins a **real-time video call** with a
-TrustCloud agent who checks their document and identity. The call is powered by
+Idvia agent who checks their document and identity. The call is powered by
 WebRTC (OpenTok / Vonage).
 
 > **⚠️ Read [WebView vs in-app browser](#webview-vs-in-app-browser) first.**
@@ -19,7 +19,7 @@ WebRTC (OpenTok / Vonage).
 | Mode | Pros | Cons | Use when |
 |------|------|------|----------|
 | **Embedded WebView** (`<VideoIdAssistedSession>`) | Fully in-app UI; you control the chrome | WebRTC behaviour varies by OS/WebView version | You want an in-app feel and have tested on your target devices |
-| **In-app browser** (`openTrustCloudSession({ mode: 'in-app-browser' })`) | Uses the system browser engine (SFSafariViewController / Chrome Custom Tabs) — best WebRTC compatibility | Separate browser chrome; completion detected via redirect/deep link | You want maximum reliability for the video call |
+| **In-app browser** (`openIdviaSession({ mode: 'in-app-browser' })`) | Uses the system browser engine (SFSafariViewController / Chrome Custom Tabs) — best WebRTC compatibility | Separate browser chrome; completion detected via redirect/deep link | You want maximum reliability for the video call |
 
 **Recommendation:** ship Assisted with **in-app browser mode** unless you have
 verified embedded WebRTC on your device matrix.
@@ -27,7 +27,7 @@ verified embedded WebRTC on your device matrix.
 ### Embedded WebView
 
 ```tsx
-import { VideoIdAssistedSession } from '@trustcloud/react-native-sdk';
+import { VideoIdAssistedSession } from '@idvia/react-native-sdk';
 
 <VideoIdAssistedSession
   url={session.url}
@@ -42,10 +42,10 @@ import { VideoIdAssistedSession } from '@trustcloud/react-native-sdk';
 ### In-app browser (recommended)
 
 ```tsx
-import { openTrustCloudSession } from '@trustcloud/react-native-sdk';
+import { openIdviaSession } from '@idvia/react-native-sdk';
 
 async function startAssisted(session) {
-  const result = await openTrustCloudSession({
+  const result = await openIdviaSession({
     url: session.url,
     landingUrl: session.landingUrl,
     landingKoUrl: session.landingKoUrl,
@@ -56,7 +56,7 @@ async function startAssisted(session) {
 }
 ```
 
-`openTrustCloudSession` opens the URL in the system in-app browser and resolves
+`openIdviaSession` opens the URL in the system in-app browser and resolves
 when the browser redirects to your landing URL or the user dismisses it. For
 reliable redirect capture, register a **deep link** (universal link / app link)
 as your landing URL so the OS hands control back to your app. See

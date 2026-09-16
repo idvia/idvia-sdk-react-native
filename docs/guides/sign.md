@@ -2,7 +2,7 @@
 
 Electronic signature: the user reviews one or more documents and signs them.
 Supports **Standard Electronic Signature**, **Qualified Electronic Signature
-(QES)**, and accessibility signing. The signing ceremony is served by TrustCloud's
+(QES)**, and accessibility signing. The signing ceremony is served by Idvia's
 provider (DocuSign, Namirial, OneSpan, Signaturit, CertySign, …) — the SDK just
 renders the returned URL.
 
@@ -22,13 +22,13 @@ renders the returned URL.
 ```tsx
 import { useEffect, useState } from 'react';
 import { ActivityIndicator } from 'react-native';
-import { SignSession } from '@trustcloud/react-native-sdk';
+import { SignSession } from '@idvia/react-native-sdk';
 
 export function SignScreen({ documentRef, onDone }) {
   const [session, setSession] = useState(null);
 
   useEffect(() => {
-    fetch('https://your-backend.example.com/trustcloud/sessions', {
+    fetch('https://your-backend.example.com/idvia/sessions', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ flow: 'sign', documentRef }),
@@ -56,7 +56,7 @@ export function SignScreen({ documentRef, onDone }) {
 
 Reaching `landingUrl` means the signer **finished the ceremony in the provider's
 UI**. The signed document, its evidence, and the final legal status are confirmed
-by TrustCloud server-side. Fetch the real status with the Sign status endpoints
+by Idvia server-side. Fetch the real status with the Sign status endpoints
 (by `trustCloudFileId` or by `clientReference`), which return values like
 `Completed`, `Pending`, or `Cancelled`. See
 [Handling results](../handling-results.md).
@@ -79,7 +79,7 @@ envelope; nothing type-specific is configured in the app.
 
 Each signer has their own `identityClientReference` and their own signing URL.
 For an in-person "sign on this device" flow, create the session per signer and
-render each URL in turn. For remote signers, TrustCloud emails them a link — you
+render each URL in turn. For remote signers, Idvia emails them a link — you
 don't render anything in-app for those.
 
 ## Tips

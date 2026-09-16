@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "TrustCloud SDK Example",
-    "slug": "trustcloud-react-native-sdk-example",
+    "name": "Idvia SDK Example",
+    "slug": "idvia-react-native-sdk-example",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -26,7 +26,7 @@
         "RECORD_AUDIO",
         "MODIFY_AUDIO_SETTINGS"
       ],
-      "package": "com.anonymous.trustcloudreactnativesdkexample"
+      "package": "com.anonymous.idviareactnativesdkexample"
     },
     "web": {
       "favicon": "./assets/favicon.png"

@@ -1,9 +1,9 @@
-import type { CreateVideoIdAssistedParams, CreateVideoIdAssistedResult, CreateVideoIdResult, CreateVideoIdUnassistedParams, TrustCloudClientConfig, CreateSignParams, CreateSignResult, CreateSignSessionParams, CreateSignSessionResult, GetSignUrlParams, VideoIdAssistedStatusParams, VideoIdUnassistedStatusParams, SignStatusParams, SignStatusResult } from './types';
-export declare class TrustCloudClient {
+import type { CreateVideoIdAssistedParams, CreateVideoIdAssistedResult, CreateVideoIdResult, CreateVideoIdUnassistedParams, IdviaClientConfig, CreateSignParams, CreateSignResult, CreateSignSessionParams, CreateSignSessionResult, GetSignUrlParams, VideoIdAssistedStatusParams, VideoIdUnassistedStatusParams, SignStatusParams, SignStatusResult } from './types';
+export declare class IdviaClient {
     private readonly urls;
     private readonly useCaseIds;
     private readonly auth;
-    constructor(config: TrustCloudClientConfig);
+    constructor(config: IdviaClientConfig);
     createVideoIdUnassisted(params: CreateVideoIdUnassistedParams): Promise<CreateVideoIdResult>;
     createVideoIdAssisted(params: CreateVideoIdAssistedParams): Promise<CreateVideoIdAssistedResult>;
     createSign(params: CreateSignParams): Promise<CreateSignResult>;
@@ -17,4 +17,4 @@ export declare class TrustCloudClient {
     private resolveUseCaseId;
     private request;
 }
-//# sourceMappingURL=TrustCloudClient.d.ts.map
+//# sourceMappingURL=IdviaClient.d.ts.map

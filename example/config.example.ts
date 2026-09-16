@@ -1,7 +1,7 @@
-import type { TrustCloudEnvironment } from '@trustcloud/react-native-sdk';
+import type { IdviaEnvironment } from '@idvia/react-native-sdk';
 
 export const CONFIG = {
-  environment: 'pre' as TrustCloudEnvironment,
+  environment: 'pre' as IdviaEnvironment,
   clientId: 'YOUR_CLIENT_ID',
   clientSecret: 'YOUR_CLIENT_SECRET',
   useCaseIds: {

@@ -1,7 +1,7 @@
 # Example app
 
 Expo dev-client app exercising the three SDK flows (VideoID Unassisted,
-VideoID Assisted, Sign) end to end against the real TrustCloud APIs.
+VideoID Assisted, Sign) end to end against the real Idvia APIs.
 
 ## Setup
 

@@ -1,6 +1,6 @@
-# TrustCloudClient — calling the APIs from the app
+# IdviaClient — calling the APIs from the app
 
-> **⚠️ Security trade-off — read first.** `TrustCloudClient` embeds your
+> **⚠️ Security trade-off — read first.** `IdviaClient` embeds your
 > `client_id` and `client_secret` in the mobile app. Anything shipped in an app
 > binary can be extracted, so this mode is a **development / pilot
 > convenience**. For production, the recommended model remains
@@ -12,9 +12,9 @@
 ## Setup
 
 ```ts
-import { TrustCloudClient } from '@trustcloud/react-native-sdk';
+import { IdviaClient } from '@idvia/react-native-sdk';
 
-const client = new TrustCloudClient({
+const client = new IdviaClient({
   environment: 'pre', // or 'pro'
   clientId: 'YOUR_CLIENT_ID',
   clientSecret: 'YOUR_CLIENT_SECRET',
@@ -71,7 +71,7 @@ const sg = await client.createSignSession({
 ```
 
 Pass the returned `url` (plus your landing URLs) straight to
-`<TrustCloudSession>` or `openTrustCloudSession` — see
+`<IdviaSession>` or `openIdviaSession` — see
 [Getting started](getting-started.md). All documented request fields are
 typed; additional fields (`docNumber`, `callcenter`, unassisted
 `configuration` entries like `useActiveLifeLivenessEngine`, …) pass through
@@ -93,6 +93,6 @@ until the status settles. See [Handling results](handling-results.md).
 
 ## Errors
 
-API failures throw `TrustCloudApiError` with `status` (HTTP), `endpoint`, and
+API failures throw `IdviaApiError` with `status` (HTTP), `endpoint`, and
 `body` (the parsed response). The client secret never appears in errors or
 logs.
