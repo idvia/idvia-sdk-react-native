@@ -1,14 +1,17 @@
 import * as React from 'react';
 import {
   ActivityIndicator,
-  Button,
+  Platform,
+  Pressable,
   SafeAreaView,
   ScrollView,
+  StatusBar as NativeStatusBar,
   StyleSheet,
   Switch,
   Text,
   View,
 } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
 import {
   SignSession,
   IdviaClient,
@@ -28,29 +31,60 @@ const client = new IdviaClient(CONFIG);
 const WEBVIEW_DEBUG = process.env.EXPO_PUBLIC_WEBVIEW_DEBUG === '1';
 
 type Flow = 'unassisted' | 'assisted' | 'sign';
+type Verdict = 'success' | 'failure' | 'cancel' | 'error' | 'status';
 type Screen =
   | { name: 'home' }
   | { name: 'session'; flow: Flow; url: string; ids?: Record<string, string> }
-  | { name: 'result'; flow: Flow; text: string; ids?: Record<string, string> };
+  | { name: 'result'; flow: Flow; verdict: Verdict; text: string; ids?: Record<string, string> };
+
+const FLOWS: { flow: Flow; title: string; description: string }[] = [
+  {
+    flow: 'unassisted',
+    title: 'VideoID Unassisted',
+    description: 'Self-service document scan and liveness check.',
+  },
+  {
+    flow: 'assisted',
+    title: 'VideoID Assisted',
+    description: 'Live video call with a verification agent.',
+  },
+  {
+    flow: 'sign',
+    title: 'Sign',
+    description: 'Review and sign a document.',
+  },
+];
+
+const FLOW_TITLE: Record<Flow, string> = Object.fromEntries(
+  FLOWS.map((f) => [f.flow, f.title])
+) as Record<Flow, string>;
+
+const VERDICT_LABEL: Record<Verdict, string> = {
+  success: 'Completed',
+  failure: 'Failed',
+  cancel: 'Cancelled',
+  error: 'Error',
+  status: 'Status',
+};
 
 export default function App() {
   const [screen, setScreen] = React.useState<Screen>({ name: 'home' });
   const [assistedInBrowser, setAssistedInBrowser] = React.useState(true);
-  const [busy, setBusy] = React.useState(false);
+  const [busy, setBusy] = React.useState<Flow | null>(null);
 
-  const fail = (e: unknown) => {
+  const fail = (flow: Flow, e: unknown) => {
     // Error#message is non-enumerable, so surface it explicitly
     const detail =
       e instanceof Error
         ? `${e.message}\n${JSON.stringify(e, null, 2)}`
         : JSON.stringify(e, null, 2);
-    setScreen({ name: 'result', flow: 'unassisted', text: `Error: ${detail}` });
+    setScreen({ name: 'result', flow, verdict: 'error', text: detail });
   };
 
   async function startUnassisted() {
-    setBusy(true);
+    setBusy('unassisted');
     try {
-      if (!(await ensureMediaPermissions())) return fail('camera/mic permission denied');
+      if (!(await ensureMediaPermissions())) return fail('unassisted', 'camera/mic permission denied');
       const s = await client.createVideoIdUnassisted({
         clientReference: `example-${Math.random().toString(36).slice(2)}`,
         docType: CONFIG.docType,
@@ -73,16 +107,16 @@ export default function App() {
         ids: { trustCloudFileId: s.trustCloudFileId, videoIdentificationId: s.videoIdentificationId },
       });
     } catch (e) {
-      fail(e);
+      fail('unassisted', e);
     } finally {
-      setBusy(false);
+      setBusy(null);
     }
   }
 
   async function startAssisted() {
-    setBusy(true);
+    setBusy('assisted');
     try {
-      if (!(await ensureMediaPermissions())) return fail('camera/mic permission denied');
+      if (!(await ensureMediaPermissions())) return fail('assisted', 'camera/mic permission denied');
       const s = await client.createVideoIdAssisted({
         clientReference: `example-${Math.random().toString(36).slice(2)}`,
         serviceCountry: CONFIG.serviceCountry,
@@ -104,14 +138,14 @@ export default function App() {
         setScreen({ name: 'session', flow: 'assisted', url: s.url, ids });
       }
     } catch (e) {
-      fail(e);
+      fail('assisted', e);
     } finally {
-      setBusy(false);
+      setBusy(null);
     }
   }
 
   async function startSign() {
-    setBusy(true);
+    setBusy('sign');
     try {
       const s = await client.createSignSession({
         signers: [CONFIG.signer],
@@ -119,9 +153,9 @@ export default function App() {
       });
       setScreen({ name: 'session', flow: 'sign', url: s.url, ids: { trustCloudFileId: s.trustCloudFileId } });
     } catch (e) {
-      fail(e);
+      fail('sign', e);
     } finally {
-      setBusy(false);
+      setBusy(null);
     }
   }
 
@@ -130,7 +164,8 @@ export default function App() {
       name: 'result',
       flow,
       ids,
-      text: `Client outcome (UX signal only): ${result.outcome}\nparams: ${JSON.stringify(result.params)}`,
+      verdict: result.outcome,
+      text: `params: ${JSON.stringify(result.params, null, 2)}`,
     });
   }
 
@@ -149,10 +184,11 @@ export default function App() {
         name: 'result',
         flow,
         ids,
-        text: `Authoritative status:\n${JSON.stringify(status, null, 2)}`,
+        verdict: 'status',
+        text: JSON.stringify(status, null, 2),
       });
     } catch (e) {
-      fail(e);
+      fail(flow, e);
     }
   }
 
@@ -388,49 +424,230 @@ true;
         onSuccess={(r) => onSessionDone(screen.flow, r, screen.ids)}
         onFailure={(r) => onSessionDone(screen.flow, r, screen.ids)}
         onCancel={() => setScreen({ name: 'home' })}
-        onError={(e) => setScreen({ name: 'result', flow: screen.flow, text: `SDK error: ${e.code} — ${e.message}` })}
+        onError={(e) =>
+          setScreen({
+            name: 'result',
+            flow: screen.flow,
+            verdict: 'error',
+            text: `SDK error: ${e.code} — ${e.message}`,
+          })
+        }
         renderLoading={() => <ActivityIndicator style={styles.center} size="large" />}
         style={styles.flex}
       />
     );
   }
 
+  const startFlow: Record<Flow, () => void> = {
+    unassisted: startUnassisted,
+    assisted: startAssisted,
+    sign: startSign,
+  };
+
   return (
-    <SafeAreaView style={styles.flex}>
-      <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.title}>Idvia SDK example</Text>
+    <View style={styles.root}>
+      <StatusBar style="light" />
+      <SafeAreaView style={styles.headerSafe}>
+        <View style={styles.header}>
+          <Text style={styles.wordmark}>Idvia</Text>
+          <View style={styles.headerMeta}>
+            <Text style={styles.headerSub}>SDK example</Text>
+            <View style={styles.envChip}>
+              <Text style={styles.envChipText}>{CONFIG.environment}</Text>
+            </View>
+          </View>
+        </View>
+      </SafeAreaView>
+      <ScrollView style={styles.flex} contentContainerStyle={styles.bodyContent}>
         {screen.name === 'result' ? (
           <>
-            <Text style={styles.mono}>{screen.text}</Text>
-            {screen.ids ? (
-              <Button title="Fetch authoritative status" onPress={() => fetchStatus(screen.flow, screen.ids!)} />
+            <View style={styles.resultHeader}>
+              <Text style={styles.resultFlow}>{FLOW_TITLE[screen.flow]}</Text>
+              <Text style={[styles.verdict, { color: VERDICT_COLOR[screen.verdict] }]}>
+                {VERDICT_LABEL[screen.verdict]}
+              </Text>
+            </View>
+            {screen.verdict !== 'status' && screen.verdict !== 'error' ? (
+              <Text style={styles.note}>
+                The client outcome is a UX signal only — the authoritative result comes from the
+                status endpoint.
+              </Text>
             ) : null}
-            <Button title="Back" onPress={() => setScreen({ name: 'home' })} />
+            {screen.ids ? (
+              <View style={styles.idBlock}>
+                {Object.entries(screen.ids).map(([key, value]) => (
+                  <Text key={key} style={styles.idLine} selectable>
+                    <Text style={styles.idKey}>{key}{'  '}</Text>
+                    {value}
+                  </Text>
+                ))}
+              </View>
+            ) : null}
+            <View style={styles.console}>
+              <Text style={styles.consoleText} selectable>
+                {screen.text}
+              </Text>
+            </View>
+            {screen.ids ? (
+              <Pressable
+                style={({ pressed }) => [styles.primaryButton, pressed && styles.pressedDim]}
+                onPress={() => fetchStatus(screen.flow, screen.ids!)}
+              >
+                <Text style={styles.primaryButtonText}>Fetch authoritative status</Text>
+              </Pressable>
+            ) : null}
+            <Pressable
+              style={({ pressed }) => [styles.quietButton, pressed && styles.pressedDim]}
+              onPress={() => setScreen({ name: 'home' })}
+            >
+              <Text style={styles.quietButtonText}>Back to flows</Text>
+            </Pressable>
           </>
-        ) : busy ? (
-          <ActivityIndicator size="large" />
         ) : (
           <>
-            <Button title="VideoID Unassisted (embedded)" onPress={startUnassisted} />
-            <View style={styles.row}>
-              <Button title="VideoID Assisted" onPress={startAssisted} />
-              <Text> in-app browser </Text>
-              <Switch value={assistedInBrowser} onValueChange={setAssistedInBrowser} />
+            <Text style={styles.lede}>
+              Run each flow against the {CONFIG.environment} environment with the credentials in
+              config.ts.
+            </Text>
+            <View style={styles.ledger}>
+              {FLOWS.map(({ flow, title, description }, index) => {
+                const mode = flow === 'assisted' && assistedInBrowser ? 'browser' : 'embedded';
+                return (
+                  <View key={flow} style={index > 0 && styles.rowDivider}>
+                    <Pressable
+                      android_ripple={{ color: 'rgba(17, 28, 46, 0.08)' }}
+                      style={({ pressed }) => [styles.flowRow, pressed && styles.rowPressed]}
+                      disabled={busy !== null}
+                      onPress={startFlow[flow]}
+                    >
+                      <View style={styles.flowText}>
+                        <Text style={styles.flowTitle}>{title}</Text>
+                        <Text style={styles.flowDescription}>{description}</Text>
+                      </View>
+                      <View style={styles.modeTag}>
+                        <Text style={styles.modeTagText}>{mode}</Text>
+                      </View>
+                      {busy === flow ? (
+                        <ActivityIndicator size="small" color={INK} />
+                      ) : (
+                        <Text style={styles.chevron}>›</Text>
+                      )}
+                    </Pressable>
+                    {flow === 'assisted' ? (
+                      <View style={styles.optionRow}>
+                        <Text style={styles.optionLabel}>Open in the in-app browser</Text>
+                        <Switch
+                          value={assistedInBrowser}
+                          onValueChange={setAssistedInBrowser}
+                          trackColor={{ true: VERIFIED }}
+                          disabled={busy !== null}
+                        />
+                      </View>
+                    ) : null}
+                  </View>
+                );
+              })}
             </View>
-            <Button title="Sign (embedded)" onPress={startSign} />
           </>
         )}
       </ScrollView>
       <IdviaPortal />
-    </SafeAreaView>
+    </View>
   );
 }
+
+const INK = '#111C2E';
+const PAPER = '#F7F8FA';
+const SLATE = '#5B6675';
+const HAIRLINE = '#E3E7ED';
+const VERIFIED = '#0E7A5B';
+const ALERT = '#B3261E';
+const MONO = Platform.select({ ios: 'Menlo', default: 'monospace' });
+
+const VERDICT_COLOR: Record<Verdict, string> = {
+  success: VERIFIED,
+  failure: ALERT,
+  cancel: SLATE,
+  error: ALERT,
+  status: INK,
+};
 
 const styles = StyleSheet.create({
   flex: { flex: 1 },
   center: { flex: 1, alignSelf: 'center' },
-  container: { padding: 24, gap: 16 },
-  row: { flexDirection: 'row', alignItems: 'center' },
-  title: { fontSize: 20, fontWeight: 'bold', marginBottom: 8 },
-  mono: { fontFamily: 'monospace', fontSize: 12 },
+  root: { flex: 1, backgroundColor: PAPER },
+
+  headerSafe: {
+    backgroundColor: INK,
+    // Android draws edge-to-edge; RN's SafeAreaView only pads on iOS.
+    paddingTop: Platform.OS === 'android' ? (NativeStatusBar.currentHeight ?? 24) : 0,
+  },
+  header: { paddingHorizontal: 24, paddingTop: 20, paddingBottom: 22 },
+  wordmark: { color: '#FFFFFF', fontSize: 32, fontWeight: '800', letterSpacing: -0.8 },
+  headerMeta: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 6 },
+  headerSub: { color: '#9AA6B8', fontSize: 14 },
+  envChip: {
+    borderColor: 'rgba(255, 255, 255, 0.35)',
+    borderWidth: 1,
+    borderRadius: 4,
+    paddingHorizontal: 6,
+    paddingVertical: 1,
+  },
+  envChipText: { color: '#E8ECF2', fontFamily: MONO, fontSize: 12 },
+
+  bodyContent: { padding: 24, paddingBottom: 48, gap: 16 },
+  lede: { fontSize: 14, color: SLATE, lineHeight: 20 },
+
+  ledger: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: HAIRLINE,
+    overflow: 'hidden',
+  },
+  rowDivider: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: HAIRLINE },
+  flowRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 18,
+    paddingVertical: 16,
+    gap: 12,
+  },
+  rowPressed: { backgroundColor: '#F0F2F6' },
+  flowText: { flex: 1, gap: 2 },
+  flowTitle: { fontSize: 16, fontWeight: '600', color: INK },
+  flowDescription: { fontSize: 13, color: SLATE, lineHeight: 18 },
+  modeTag: {
+    borderWidth: 1,
+    borderColor: HAIRLINE,
+    borderRadius: 4,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+  },
+  modeTagText: { fontSize: 11, color: SLATE, fontFamily: MONO },
+  chevron: { fontSize: 22, color: '#9AA6B8', marginTop: -2 },
+  optionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 18,
+    paddingBottom: 14,
+    paddingTop: 2,
+  },
+  optionLabel: { fontSize: 13, color: SLATE },
+
+  resultHeader: { gap: 2 },
+  resultFlow: { fontSize: 14, color: SLATE },
+  verdict: { fontSize: 34, fontWeight: '800', letterSpacing: -0.8 },
+  note: { fontSize: 13, color: SLATE, lineHeight: 19 },
+  idBlock: { gap: 4 },
+  idLine: { fontFamily: MONO, fontSize: 12, color: INK },
+  idKey: { color: SLATE },
+  console: { backgroundColor: INK, borderRadius: 12, padding: 16 },
+  consoleText: { fontFamily: MONO, fontSize: 12, lineHeight: 18, color: '#D9E1EC' },
+  primaryButton: { backgroundColor: INK, borderRadius: 10, paddingVertical: 14, alignItems: 'center' },
+  primaryButtonText: { color: '#FFFFFF', fontSize: 15, fontWeight: '600' },
+  quietButton: { paddingVertical: 12, alignItems: 'center' },
+  quietButtonText: { color: SLATE, fontSize: 15, fontWeight: '500' },
+  pressedDim: { opacity: 0.7 },
 });
