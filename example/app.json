@@ -8,6 +8,7 @@
     "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": true,
+      "bundleIdentifier": "com.anonymous.idviareactnativesdkexample",
       "infoPlist": {
         "NSCameraUsageDescription": "We use the camera to verify your identity.",
         "NSMicrophoneUsageDescription": "We use the microphone for identity video calls."

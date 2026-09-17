@@ -23,6 +23,9 @@ npx expo run:android    # or: npx expo run:ios
 
 The camera does not work in emulators/simulators; Sign works anywhere.
 
+New to this? [RUN-ON-IPHONE.md](RUN-ON-IPHONE.md) is a from-zero, step-by-step
+guide to running the app on an iPhone from a Mac, written for non-developers.
+
 ## Debugging the WebView
 
 Set `EXPO_PUBLIC_WEBVIEW_DEBUG=1` when starting Metro to turn on the
