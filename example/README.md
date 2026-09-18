@@ -11,6 +11,9 @@ npm install
 cp config.example.ts config.ts   # then edit config.ts with your real credentials
 ```
 
+The example installs the SDK from npm (`@idvia/react-native-sdk`) exactly as
+an integrator would; nothing here points at the SDK source tree.
+
 `config.ts` is git-ignored — real credentials never leave your machine. Fill
 in the client id/secret, use case ids, `docType`, `serviceCountry`/`language`
 (assisted), the signer, and a reachable PDF URL for the Sign flow.

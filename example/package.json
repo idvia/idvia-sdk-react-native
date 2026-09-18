@@ -4,6 +4,7 @@
   "private": true,
   "main": "index.ts",
   "dependencies": {
+    "@idvia/react-native-sdk": "^0.2.0",
     "expo": "~57.0.16",
     "expo-status-bar": "~57.0.1",
     "expo-web-browser": "~57.0.2",

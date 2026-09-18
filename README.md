@@ -1,48 +1,68 @@
 # @idvia/react-native-sdk
 
-React Native SDK for Idvia **VideoID Unassisted**, **VideoID
-Assisted**, and **Sign** flows: an API client plus a managed-WebView rendering
-layer.
+React Native SDK for Idvia **VideoID Unassisted**, **VideoID Assisted**, and
+**Sign** flows: a typed API client plus a managed-WebView rendering layer.
 
-This repository contains everything an integrator needs:
+- Renders the hosted Idvia flows inside your app and reports the outcome
+  through typed callbacks.
+- Fences navigation and camera/microphone access to Idvia hosts.
+- No native code of its own: `react-native-webview` is the only required peer.
 
-| Path | What it is |
-|------|------------|
-| [`docs/`](docs/index.md) | Integrator documentation. Start with the [overview](docs/index.md), then [getting started](docs/getting-started.md). |
-| [`example/`](example/README.md) | Runnable Expo dev-client app exercising all three flows against the real APIs. |
-| `lib/` | The compiled SDK (CommonJS + ES modules + TypeScript declarations). This is the package the example app — and your app — consumes. |
-
-The SDK source code lives in a separate (private) repository; `lib/` here is
-its build output, published together with the docs and example.
-
-## Installing the SDK in your app
-
-The package is not on the public npm registry. Install it straight from this
-repository:
+## Install
 
 ```bash
-npm install <path-or-git-url-of-this-repo>
+npm install @idvia/react-native-sdk react-native-webview
 ```
 
-plus the required peer dependency:
+Then complete the one-time native setup (camera/microphone permissions) in
+[Platform setup](docs/platform-setup.md).
 
-```bash
-npm install react-native-webview
+## Minimal usage
+
+```tsx
+import { IdviaSession } from '@idvia/react-native-sdk';
+
+// `url` and `landingUrl` come from your backend, which creates the session
+// with your credentials (see docs/backend-session-creation.md).
+<IdviaSession
+  url={session.url}
+  landingUrl={session.landingUrl}
+  onSuccess={(r) => console.log('completed', r.params)}
+  onFailure={(r) => console.log('failed', r.params)}
+  onCancel={() => console.log('cancelled by the user')}
+  onError={(e) => console.warn(e.code, e.message)}
+/>
 ```
 
-`expo-web-browser` / `react-native-inappbrowser-reborn` are optional peers,
-only needed for the in-app-browser presentation mode — see
-[platform setup](docs/platform-setup.md).
+The client-side outcome is a UX signal only: confirm the result from your
+backend with the status endpoints or webhooks.
 
-## Running the example app
+## Documentation
 
-```bash
-cd example
-npm install
-cp config.example.ts config.ts   # then edit config.ts with your real credentials
-npx expo run:android             # or: npx expo run:ios
-```
+| Read | For |
+|------|-----|
+| [Getting started](docs/getting-started.md) | Install, permissions, first flow |
+| [Guides](docs/guides/) | Unassisted, Assisted and Sign step by step |
+| [Backend: creating a session](docs/backend-session-creation.md) | The production pattern (credentials stay server-side) |
+| [API reference](docs/api-reference.md) | Props, hooks, types, error codes |
+| [Handling results](docs/handling-results.md) | Landing URLs, status endpoints, webhooks |
+| [Troubleshooting](docs/troubleshooting.md) | Black camera, permission prompts, WebView debugging |
 
-A real device is required for the video flows (no camera in emulators). Full
-instructions, including WebView debugging, are in
-[`example/README.md`](example/README.md).
+A runnable Expo dev-client app exercising the three flows against the real
+APIs is in [`example/`](example/README.md).
+
+## Requirements
+
+React Native 0.71+ (bare) or Expo SDK 49+ with a custom dev client. A real
+device is required for the video flows (emulators have no camera).
+
+## Support
+
+Integration questions and bug reports:
+[github.com/idvia/idvia-sdk-react-native/issues](https://github.com/idvia/idvia-sdk-react-native/issues).
+Security issues: see [SECURITY.md](SECURITY.md).
+
+## License
+
+Proprietary. Use of this SDK requires a service agreement with Idvia; see
+[LICENSE](LICENSE).

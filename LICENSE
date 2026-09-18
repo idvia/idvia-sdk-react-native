@@ -1,0 +1,29 @@
+Idvia React Native SDK - Proprietary License
+
+Copyright (c) 2026 Idvia. All rights reserved.
+
+This software (the "SDK") is licensed, not sold. Subject to a valid service
+agreement between you (or the organization you represent) and Idvia (the
+"Agreement"), Idvia grants you a non-exclusive, non-transferable, revocable
+license to:
+
+  1. install and use the SDK in applications that integrate Idvia services
+     under the Agreement; and
+  2. distribute the SDK solely as an integrated part of such applications.
+
+You may not:
+
+  a. use the SDK without a valid Agreement, or beyond its scope;
+  b. redistribute, sublicense, sell or lease the SDK on its own;
+  c. remove or alter any proprietary notice in the SDK;
+  d. use the SDK to build a product that competes with Idvia services.
+
+The SDK is provided "AS IS", without warranty of any kind, express or implied,
+including but not limited to the warranties of merchantability, fitness for a
+particular purpose and non-infringement. To the extent permitted by law, Idvia
+shall not be liable for any claim, damages or other liability arising from the
+use of the SDK, except as expressly provided in the Agreement.
+
+This license terminates automatically if you breach it or when the Agreement
+ends. Any warranty, support or liability terms in the Agreement prevail over
+this license.

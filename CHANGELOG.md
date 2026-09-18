@@ -4,6 +4,10 @@
 
 Verified end to end on a real Android device against PRE (Unassisted, Assisted, Sign).
 
+### Distribution
+- First release on the public npm registry: `npm install @idvia/react-native-sdk`.
+- Proprietary `LICENSE` and `SECURITY.md` added; maintainer documentation moved to `CONTRIBUTING.md`.
+
 ### Breaking (types only)
 - `CreateVideoIdUnassistedParams.docNumber` is now required (the API rejects an empty value).
 - `CreateVideoIdAssistedParams.docType` and `docNumber` are now required.

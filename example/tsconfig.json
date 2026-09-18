@@ -2,8 +2,6 @@
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
     "strict": true,
-    "ignoreDeprecations": "6.0",
-    "baseUrl": ".",
-    "paths": { "@idvia/react-native-sdk": ["../lib/typescript/src/index.d.ts"] }
+    "ignoreDeprecations": "6.0"
   }
 }
