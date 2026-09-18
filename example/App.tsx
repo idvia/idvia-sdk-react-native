@@ -21,9 +21,17 @@ import {
   type IdviaResult,
 } from '@idvia/react-native-sdk';
 import { CONFIG } from './config';
+import { SIGN_DOCUMENT_BASE64, SIGN_DOCUMENT_FILENAME } from './sign-document';
 import { ensureMediaPermissions } from './permissions';
 
 const client = new IdviaClient(CONFIG);
+
+// uuid v4 without relying on crypto.randomUUID (not guaranteed on Hermes)
+const uuid = () =>
+  'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    return (c === 'x' ? r : (r & 0x3) | 0x8).toString(16);
+  });
 
 // Set EXPO_PUBLIC_WEBVIEW_DEBUG=1 (e.g. `EXPO_PUBLIC_WEBVIEW_DEBUG=1 npx expo start`)
 // to forward the webview page's console, errors, network and media activity to
@@ -88,7 +96,8 @@ export default function App() {
       const s = await client.createVideoIdUnassisted({
         clientReference: `example-${Math.random().toString(36).slice(2)}`,
         docType: CONFIG.docType,
-        docNumber: '',
+        // mandatory and non-empty in the API (400 "'DocNumber' is Required" otherwise)
+        docNumber: CONFIG.subject.docNumber,
         documentCountry: CONFIG.serviceCountry,
         serviceCountry: CONFIG.serviceCountry,
         metadata: '',
@@ -123,6 +132,9 @@ export default function App() {
         language: CONFIG.language,
         name: CONFIG.subject.name,
         surname: CONFIG.subject.surname,
+        // both mandatory in the API (400 "Document type is Required | Document number is Required")
+        docType: CONFIG.docType,
+        docNumber: CONFIG.subject.docNumber,
         landingUrl: CONFIG.landingUrl,
       });
       // plain-text assisted responses carry no ids — status polling is unavailable then
@@ -147,9 +159,25 @@ export default function App() {
   async function startSign() {
     setBusy('sign');
     try {
+      // An embedded ceremony needs signer/document ids, signMode EMBEBED and the
+      // signatures block linking them; the SDK then polls for the embedded URL, which
+      // the provider produces a few seconds after the envelope is created.
+      const signerId = uuid();
+      const documentId = uuid();
       const s = await client.createSignSession({
-        signers: [CONFIG.signer],
-        documents: [{ url: CONFIG.signDocumentUrl }],
+        clientReference: `example-${Math.random().toString(36).slice(2)}`,
+        autoClose: true,
+        signers: [{ ...CONFIG.signer, id: signerId, order: 1, signMode: 'EMBEBED', authenticationMethod: 'NONE' }],
+        documents: [{ id: documentId, base64: SIGN_DOCUMENT_BASE64, fileName: SIGN_DOCUMENT_FILENAME }],
+        signatures: [
+          {
+            documentId,
+            identityId: signerId,
+            positions: [{ anchor: 'FirmeAqui1:', x: 30, y: 30 }],
+            type: 'SIGNER',
+          },
+        ],
+        reminders: { expireAfter: 0, expireWarn: 0, reminderDelay: 0, reminderFrequency: 0 },
       });
       setScreen({ name: 'session', flow: 'sign', url: s.url, ids: { trustCloudFileId: s.trustCloudFileId } });
     } catch (e) {

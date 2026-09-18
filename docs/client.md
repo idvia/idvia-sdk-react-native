@@ -38,7 +38,8 @@ expiry, and retries once on a 401.
 // VideoID Unassisted
 const un = await client.createVideoIdUnassisted({
   clientReference: 'your-correlation-id',
-  docType: 'Id', // mandatory: 'Id', 'Passport', 'DriversLicense', …
+  docType: 'Id', // mandatory: 'Id', 'Passport', 'DrivingLicense', 'ResidencePermit', …
+  docNumber: '12345678Z', // mandatory and non-empty
   landingUrl: 'https://app.example.com/tc/ok',
   landingKoUrl: 'https://app.example.com/tc/ko',
   // optional tuning — sent as the API's nested `configuration` object
@@ -55,25 +56,46 @@ const as = await client.createVideoIdAssisted({
   language: 'es', // mandatory: ISO 639-1 alpha-2
   name: 'Ada', // some use cases reject the call without name/surname
   surname: 'Lovelace',
+  docType: 'Id', // mandatory
+  docNumber: '12345678Z', // mandatory and non-empty
   landingUrl: 'https://app.example.com/tc/ok',
 });
 // → { url, trustCloudFileId, videoIdentificationId }
 
-// Sign (two-step create + get-URL in one call)
+// Sign (create + get-URL in one call; the SDK polls for the embedded URL, which the
+// provider produces a few seconds after the envelope is created)
+const signerId = uuid(); // any UUID you generate
+const documentId = uuid();
 const sg = await client.createSignSession({
-  signers: [{ clientReference: 'signer-1', name: 'Ada', lastName: 'Lovelace', email: 'ada@example.com', role: 'SIGNER' }],
-  documents: [{ url: 'https://your-host/document.pdf' }],
+  clientReference: 'your-correlation-id',
+  autoClose: true,
+  signers: [{
+    id: signerId,
+    order: 1,
+    role: 'SIGNER',
+    signMode: 'EMBEBED', // API spelling; required for an in-app ceremony
+    authenticationMethod: 'NONE',
+    clientReference: 'signer-1',
+    name: 'Ada',
+    lastName: 'Lovelace',
+    email: 'ada@example.com',
+  }],
+  documents: [{ id: documentId, base64: '<PDF as base64>', fileName: 'contract.pdf' }],
+  // links each signer to each document and places the signature (text anchor and/or x/y)
+  signatures: [{ documentId, identityId: signerId, positions: [{ anchor: 'Sign here:', x: 30, y: 30 }], type: 'SIGNER' }],
 });
 // → { url, trustCloudFileId }
 // (createSign and getSignUrl are also available separately; the signing URL
 // is fetched for the first signer's clientReference unless you pass
-// identityClientReference explicitly)
+// identityClientReference explicitly. The url endpoint answers 400 "No url found
+// for operation" until the ceremony exists; createSignSession retries it —
+// tune with urlRetries / urlRetryDelayMs.)
 ```
 
 Pass the returned `url` (plus your landing URLs) straight to
 `<IdviaSession>` or `openIdviaSession` — see
 [Getting started](getting-started.md). All documented request fields are
-typed; additional fields (`docNumber`, `callcenter`, unassisted
+typed; additional fields (`callcenter`, unassisted
 `configuration` entries like `useActiveLifeLivenessEngine`, …) pass through
 as-is.
 

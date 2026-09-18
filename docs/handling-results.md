@@ -98,5 +98,7 @@ in the meantime.
 When you use the in-app-browser mode (`openIdviaSession`), completion is
 detected when the browser redirects to your `landingUrl`. For the OS to hand
 control back to your app, register that URL as a **universal link (iOS)** / **app
-link (Android)** pointing at your app, or use a custom URL scheme. The SDK
-resolves its promise when it receives that redirect.
+link (Android)** pointing at your app. Avoid custom URL schemes (`myapp://`):
+on Android any installed app can claim the same scheme and intercept the
+redirect, together with its query parameters. The SDK resolves its promise when
+it receives that redirect.

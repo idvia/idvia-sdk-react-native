@@ -28,19 +28,20 @@ The API client used to create sessions in-app is documented in
 | `onError` | `(error: IdviaError) => void` | — | Fired on load failure, permission denial, or invalid URL. |
 | `onNavigationEvent` | `(event: IdviaNavigationEvent) => void` | — | Low-level: every navigation the WebView attempts. For diagnostics. |
 | `renderLoading` | `() => React.ReactElement` | — | Custom loading UI shown while the flow loads. |
-| `mediaPermissions` | `boolean` | — | Default `true`. Auto-grant camera/mic to the WebView. Set `false` for Sign-only screens. |
+| `mediaPermissions` | `boolean` | — | Default `true`. Auto-grant camera/mic to the page's own host (iOS: `grantIfSameHostElsePrompt`). Set `false` for Sign-only screens (iOS: `deny`). See the note below for Android. |
+| `allowedHosts` | `readonly string[]` | — | Extra hosts the **main frame** may navigate to inside the WebView, as exact hosts or `*.example.com`. Added to `DEFAULT_ALLOWED_HOSTS` (`*.trustcloud.solutions`, `*.trustcloud.com`, `*.idvia.com`) and to the hosts of `url`, `landingUrl` and `landingKoUrl`. Any other main-frame navigation is blocked and opened in the system browser, so a page reached through a link or an open redirect never runs with this WebView's camera/mic grants or cookies. Iframes are not fenced. |
 | `loadTimeoutMs` | `number` | — | Default `30000`. If the first load hasn't completed in time, `onError` fires with `TIMEOUT`. |
 | `style` | `ViewStyle` | — | Passed to the container. Usually `{ flex: 1 }`. |
-| `webViewProps` | `Record<string, unknown>` | — | Escape hatch to override underlying `react-native-webview` props. Typed loosely (not `Partial<WebViewProps>`) because the webview types come from an optional peer dependency; values are passed through untyped to the underlying `WebView`. |
+| `webViewProps` | `Record<string, unknown>` | — | Escape hatch spread onto the underlying `react-native-webview`. Typed loosely (not `Partial<WebViewProps>`) because the webview types come from an optional peer dependency. **Not overridable:** `javaScriptEnabled`, `originWhitelist`, `mixedContentMode`, `mediaCapturePermissionGrantType`. **Composed:** your `onShouldStartLoadWithRequest` runs first and a `false` blocks the load, but the SDK's landing detection and host allowlist always run after it; your `injectedJavaScriptBeforeContentLoaded` runs after the SDK's permissions shim, not instead of it. |
 
-> **`mediaPermissions` is best-effort.** On current `react-native-webview`
-> Android versions, `getUserMedia` grants are auto-managed by the library
-> based on the app's OS-level camera/mic permissions — there is no reliable
-> JS-level `onPermissionRequest` hook exposed for integrators to intercept
-> this decision. Setting `mediaPermissions={false}` asks the WebView to deny
-> the page's request, but do not treat it as the access-control boundary:
-> gate camera/mic access by requesting (or withholding) the runtime
-> permissions per [Platform setup](platform-setup.md) instead.
+> **Android has no per-origin camera/mic hook.** `react-native-webview` grants
+> `getUserMedia` on Android whenever the app holds the OS-level camera/mic
+> permission, for any page the WebView loads; `mediaCapturePermissionGrantType`
+> (and therefore `mediaPermissions`) only takes effect on iOS. On Android the
+> control is the host allowlist: only the flow's own hosts can be reached in the
+> main frame, so nothing else ever runs inside this WebView. For Sign-only
+> screens on Android, additionally do not request the camera/mic runtime
+> permissions (see [Platform setup](platform-setup.md)).
 
 ## Imperative API
 
@@ -100,7 +101,7 @@ interface IdviaResult {
   outcome: IdviaOutcome;
   /** The full URL that was intercepted, including query string. */
   landingUrl?: string;
-  /** Parsed query params from the landing URL (provider-dependent). */
+  /** Parsed query params from the landing URL. User-controllable: never trust them as a verdict. */
   params?: Record<string, string>;
 }
 ```
@@ -127,12 +128,10 @@ interface IdviaError {
 }
 ```
 
-> **`PERMISSION_DENIED` is best-effort.** It fires when `mediaPermissions` is
-> `false` and the page still asks for the camera/mic — see the note on
-> `mediaPermissions` above. On current `react-native-webview` Android
-> versions the underlying grant/deny decision is made by the library from the
-> app's OS-level permissions, so this code is not a substitute for handling
-> runtime permissions per [Platform setup](platform-setup.md).
+> **`PERMISSION_DENIED` is reserved.** The SDK no longer emits it: the
+> camera/mic decision is made natively (iOS: by `mediaCapturePermissionGrantType`,
+> Android: from the app's runtime permissions) and never reaches JavaScript. The
+> code stays in the union for compatibility.
 
 ### `IdviaNavigationEvent`
 

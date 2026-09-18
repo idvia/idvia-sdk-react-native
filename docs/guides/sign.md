@@ -15,7 +15,9 @@ renders the returned URL.
 - A backend endpoint that creates a signing session — see
   [Backend: creating a session](../backend-session-creation.md#sign). Remember Sign
   is a two-step create (create envelope → get signing URL, where the URL is
-  returned in the `message` field).
+  returned in the `message` field), that the envelope needs `signMode: "EMBEBED"`
+  and a `signatures` block for an in-app ceremony, and that the URL appears a few
+  seconds after creation (poll the url endpoint until it stops answering 400).
 
 ## Full example
 

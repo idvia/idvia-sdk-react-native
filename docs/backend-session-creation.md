@@ -46,6 +46,7 @@ Content-Type: application/json
 {
   "clientReference": "your-correlation-id",
   "docType": "Id",
+  "docNumber": "12345678Z",
   "configuration": {
     "landingURL": "https://app.example.com/tc/ok",
     "landingKoUrl": "https://app.example.com/tc/ko",
@@ -56,7 +57,9 @@ Content-Type: application/json
 ```
 
 `docType` is **mandatory** — the document type the user will present (`Id`,
-`Passport`, `DriversLicense`, …). The nested `configuration` object is also
+`Passport`, `DrivingLicense`, `ResidencePermit`, …) — and so is `docNumber`, which
+must be non-empty (the API answers 400 `'DocNumber' is Required` otherwise). The
+nested `configuration` object is also
 **mandatory**; the landing URLs, expiry, and all verification tuning
 (`useActiveLifeLivenessEngine`, `checkForFaceMatching`, `workflow`, …) live
 inside it, not at the top level.
@@ -91,12 +94,17 @@ Content-Type: application/json
   "language": "es",
   "name": "Ada",
   "surname": "Lovelace",
+  "docType": "Id",
+  "docNumber": "12345678Z",
   "landingUrl": "https://app.example.com/tc/ok"
 }
 ```
 
-`serviceCountry` (ISO 3166-1 alpha-2) and `language` (ISO 639-1 alpha-2) are
-**mandatory**; `name` and `surname` are also enforced by some use cases.
+`serviceCountry` (ISO 3166-1 alpha-2), `language` (ISO 639-1 alpha-2), `docType`
+and a non-empty `docNumber` are **mandatory** (400 `Document type is Required |
+Document number is Required` otherwise); `name` and `surname` are also enforced by
+some use cases. Accepted `docType` values: `Id`, `Passport`, `DrivingLicense`,
+`MilitaryId`, `ResidencePermit`, `IdCard`, `NC`, `PP`, `DL`, `RP`.
 
 **Response:**
 
@@ -126,26 +134,46 @@ Authorization: Bearer <token>
 Content-Type: application/json
 
 {
+  "clientReference": "your-correlation-id",
+  "autoClose": true,
   "signers": [
     {
+      "id": "33c09020-9b47-4afa-8612-0dcf17bd86e6",
+      "order": 1,
+      "role": "SIGNER",
+      "signMode": "EMBEBED",
+      "authenticationMethod": "NONE",
       "clientReference": "signer-1",
       "name": "Ada",
       "lastName": "Lovelace",
-      "email": "ada@example.com",
-      "role": "SIGNER"
+      "email": "ada@example.com"
     }
   ],
-  "documents": [{ "url": "https://your-host/document.pdf" }]
+  "documents": [
+    { "id": "22a19020-9b47-4afa-8612-0dcf17bd86e6", "base64": "<PDF as base64>", "fileName": "contract.pdf" }
+  ],
+  "signatures": [
+    {
+      "documentId": "22a19020-9b47-4afa-8612-0dcf17bd86e6",
+      "identityId": "33c09020-9b47-4afa-8612-0dcf17bd86e6",
+      "positions": [{ "anchor": "Sign here:", "x": 30, "y": 30 }],
+      "type": "SIGNER"
+    }
+  ]
 }
 ```
 
 The signer's `clientReference` is what step 2's `{identityClientReference}`
-path segment refers to.
+path segment refers to. `id` values are UUIDs you generate; `signatures` links
+each signer to each document and places the signature. `signMode: "EMBEBED"`
+(API spelling) is what makes the provider produce an embedded URL — without it,
+or without `signatures`, the create call may succeed but no URL ever appears.
+A minimal body with only `signers` and `documents` is rejected with a 500.
 
-**Response:**
+**Response** — the new `trustCloudFileId`, as a bare JSON string:
 
 ```json
-{ "trustCloudFileId": "df28f22e-c692-4c7d-b132-c1bc6a9587db" }
+"df28f22e-c692-4c7d-b132-c1bc6a9587db"
 ```
 
 **2. Get the embedded signing URL:**
@@ -154,6 +182,10 @@ path segment refers to.
 GET /api/v1/sign/useCase/{useCaseId}/trustCloudFile/{trustCloudFileId}/{identityClientReference}/url
 Authorization: Bearer <token>
 ```
+
+The provider builds the embedded ceremony asynchronously: until it exists this
+endpoint answers `400 No url found for operation` (about 5 s in practice). Poll
+it every few seconds; `IdviaClient.createSignSession` does this for you.
 
 **Response** — note the URL is in the `message` field:
 
