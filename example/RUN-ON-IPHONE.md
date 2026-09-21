@@ -98,7 +98,21 @@ press Enter. Wait for it to finish before the next one.
      npx expo run:ios --device
      ```
 
-10. **First launch may be blocked** with "Untrusted Developer". On the phone:
+10. **If it stops with a `Sandbox: bash(...) deny(1) file-write-data ...
+    ip.txt` error** (and "xcodebuild exited with error code 65"), that's Xcode
+    15 or newer blocking the script that copies the JavaScript bundle into the
+    app. Turn that block off once, in Terminal from the `example` folder:
+
+    ```bash
+    sed -i '' 's/ENABLE_USER_SCRIPT_SANDBOXING = YES;/ENABLE_USER_SCRIPT_SANDBOXING = NO;/g' ios/IdviaSDKExample.xcodeproj/project.pbxproj
+    npx expo run:ios --device
+    ```
+
+    Or in Xcode: blue project icon → target under **TARGETS** → **Build
+    Settings** → **All** → search "User Script Sandboxing" → set it to **No**
+    (do the same under **PROJECT**), save, and run the command again.
+
+11. **First launch may be blocked** with "Untrusted Developer". On the phone:
     **Settings → General → VPN & Device Management** → tap the developer
     entry with your Apple ID → **Trust**. Then open the app again.
 
@@ -116,7 +130,8 @@ press Enter. Wait for it to finish before the next one.
   `cd ~/Desktop/idvia-sdk-react-native/example` and `npx expo run:ios --device`.
 - **The app stopped opening after ~a week:** with a free Apple ID, installs
   expire after 7 days. Just run the command above again to reinstall.
-- **"Untrusted Developer":** step 10.
+- **"Untrusted Developer":** step 11.
+- **`Sandbox: ... deny(1) file-write-data`:** step 10.
 - **The app opens but hangs on a white screen:** make sure the Terminal
   command is still running and both devices are on the same Wi-Fi, then close
   and reopen the app.

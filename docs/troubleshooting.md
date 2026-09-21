@@ -81,3 +81,18 @@ backend `results` endpoint (or subscribe) until it settles — see
 Expo Go can't grant custom native permissions. Use a **custom dev client**
 (`npx expo run:ios` / `run:android`, or an EAS dev build) and add the permissions
 via `app.json` as shown in [Platform setup](platform-setup.md).
+
+## iOS build fails with `Sandbox: bash(...) deny(1) file-write-data ... ip.txt`
+
+Xcode 15+ enables **User Script Sandboxing** on new projects, which blocks the
+"Bundle React Native code and images" build phase from writing into the `.app`
+(`xcodebuild` exits with code 65). Set `ENABLE_USER_SCRIPT_SANDBOXING` to `NO`
+for the target and the project — in Xcode (**Build Settings → User Script
+Sandboxing → No**) or directly:
+
+```bash
+sed -i '' 's/ENABLE_USER_SCRIPT_SANDBOXING = YES;/ENABLE_USER_SCRIPT_SANDBOXING = NO;/g' ios/<YourApp>.xcodeproj/project.pbxproj
+```
+
+Expo regenerates `ios/` on `npx expo prebuild --clean`, so reapply it (or keep it
+in a config plugin) after a clean prebuild.
