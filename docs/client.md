@@ -88,8 +88,9 @@ const sg = await client.createSignSession({
 // (createSign and getSignUrl are also available separately; the signing URL
 // is fetched for the first signer's clientReference unless you pass
 // identityClientReference explicitly. The url endpoint answers 400 "No url found
-// for operation" until the ceremony exists; createSignSession retries it —
-// tune with urlRetries / urlRetryDelayMs.)
+// for operation" until the ceremony exists; createSignSession waits 5 s and then
+// polls it every 3 s for up to 45 s — tune with urlInitialDelayMs / urlRetries /
+// urlRetryDelayMs.)
 ```
 
 Pass the returned `url` (plus your landing URLs) straight to

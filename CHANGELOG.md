@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.1
+
+### Changed
+- `createSignSession`: the embedded URL is never ready right after the create call, so the
+  first `getSignUrl` poll now waits 5 s (new option `urlInitialDelayMs`); it then polls every
+  3 s until 45 s have elapsed (`urlRetries` default 15 → 14). Saves one guaranteed 400 per
+  session; the total wait is unchanged.
+
 ## 0.2.0
 
 Verified end to end on a real Android device against PRE (Unassisted, Assisted, Sign).
